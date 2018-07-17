@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wizard SYSTEM "Wizard.dtd">
+
+<wizard>
+	<plugin type="minimalIO">
+	</plugin>
+	<plugin type="dialogos.plugin.tts">
+	</plugin>
+	<graph directed="1" Graphic="1" Layout="points">
+		<att name="width" type="integer" value="765"/>
+		<att name="height" type="integer" value="542"/>
+		<groovyFunctions></groovyFunctions>
+		<node uid="17a89f9b-5d24-45f7-b53d-8933ced34e29" class="minimalIO.TextInputNode">
+			<graphics x="388" y="182" fill="#b20000"/>
+			<att name="title" type="string" value="TextInput"/>
+		</node>
+		<node uid="2a5ddf6b-43a6-4adf-98ec-f489a5c88e7c" class="com.clt.diamant.graph.nodes.EndNode">
+			<graphics x="430" y="408" fill="#9999ff"/>
+			<att name="title" type="string" value="Ende"/>
+		</node>
+		<node uid="367451bc-f053-4a29-a1fc-3772f7b7afc0" class="com.clt.diamant.graph.nodes.StartNode">
+			<graphics x="370" y="40" fill="#9999ff"/>
+			<att name="title" type="string" value="Start"/>
+		</node>
+		<node uid="ef4d700a-fa05-43b9-ba5d-a19f46d3308e" class="minimalIO.TextOutputNode">
+			<graphics x="368" y="294" fill="#00b200"/>
+			<att name="title" type="string" value="TextOutput"/>
+			<att name="prompt" type="text">
+				<value>hallo
+</value>
+			</att>
+			<att name="prompt_type" type="string" value="text"/>
+			<att name="wait" type="boolean" value="1"/>
+		</node>
+		<edge src="17a89f9b-5d24-45f7-b53d-8933ced34e29" tgt="ef4d700a-fa05-43b9-ba5d-a19f46d3308e">
+			<att name="condition" type="string" value="eins"/>
+		</edge>
+		<edge src="17a89f9b-5d24-45f7-b53d-8933ced34e29" tgt="ef4d700a-fa05-43b9-ba5d-a19f46d3308e">
+			<att name="condition" type="string" value="zwei"/>
+		</edge>
+		<edge src="367451bc-f053-4a29-a1fc-3772f7b7afc0" tgt="17a89f9b-5d24-45f7-b53d-8933ced34e29">
+		</edge>
+		<edge src="ef4d700a-fa05-43b9-ba5d-a19f46d3308e" tgt="2a5ddf6b-43a6-4adf-98ec-f489a5c88e7c">
+		</edge>
+	</graph>
+</wizard>

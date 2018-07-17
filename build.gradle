@@ -1,6 +1,7 @@
 plugins {
   id 'java'
   id 'maven'
+  id 'application'
 }
 repositories {
   jcenter()
@@ -8,13 +9,12 @@ repositories {
 }
 
 dependencies {
-  compile(group:'com.github.coli-saar', name:'dialogos', version:'master-SNAPSHOT') {
-    exclude module: 'DialogOS_PocketSphinxPlugin'
-    exclude module: 'DialogOS_NxtPlugin'
-    exclude module: 'DialogOS_MinimalInputOutput'
+  implementation(group:'com.github.dialogos-project', name:'dialogos', version:'ba65862370960c97d76a00971f206fe6ef621f25') {
     exclude module: 'DialogOS_SphinxPlugin'
-//    exclude module: 'DialogOS_MaryTTSPlugin'
   }
 }
-//mainClassName = 'com.clt.dialogos.DialogOS'
+mainClassName = 'com.clt.dialogos.DialogOS'
 def version = 1.0
+run {
+  standardInput = System.in
+}
