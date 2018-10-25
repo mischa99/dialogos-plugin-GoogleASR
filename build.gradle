@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-  implementation(group:'com.github.dialogos-project', name:'dialogos', version:'ba65862370960c97d76a00971f206fe6ef621f25') {
+  implementation(group:'com.github.dialogos-project', name:'dialogos', version:'v2.0.1') {
     exclude module: 'DialogOS_SphinxPlugin'
   }
 }
