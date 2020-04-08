@@ -1,17 +1,27 @@
+
+
 plugins {
   id 'java'
   id 'maven'
   id 'application'
 }
+
+
+
 repositories {
   jcenter()
   maven { url "https://jitpack.io" }
+  mavenCentral()
 }
+
 
 dependencies {
   implementation(group:'com.github.dialogos-project', name:'dialogos', version:'v2.0.1') {
-    exclude module: 'DialogOS_SphinxPlugin'
+    
   }
+  compile (group: 'com.google.guava', name: 'guava', version: '26.0-jre')
+  implementation group: 'com.google.api.grpc', name: 'grpc-google-cloud-speech-v1', version: '1.21.0'
+  compile 'com.google.cloud:google-cloud-speech:1.21.0'
 }
 mainClassName = 'com.clt.dialogos.DialogOS'
 def version = 1.0

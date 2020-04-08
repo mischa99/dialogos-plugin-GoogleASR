@@ -2,7 +2,7 @@
 <!DOCTYPE wizard SYSTEM "Wizard.dtd">
 
 <wizard>
-	<plugin type="minimalIO">
+	<plugin type="plugin">
 	</plugin>
 	<plugin type="dialogos.plugin.tts">
 	</plugin>
@@ -10,7 +10,7 @@
 		<att name="width" type="integer" value="765"/>
 		<att name="height" type="integer" value="542"/>
 		<groovyFunctions></groovyFunctions>
-		<node uid="17a89f9b-5d24-45f7-b53d-8933ced34e29" class="minimalIO.TextInputNode">
+		<node uid="17a89f9b-5d24-45f7-b53d-8933ced34e29" class="plugin.TextInputNode">
 			<graphics x="388" y="182" fill="#b20000"/>
 			<att name="title" type="string" value="TextInput"/>
 		</node>
@@ -22,7 +22,7 @@
 			<graphics x="370" y="40" fill="#9999ff"/>
 			<att name="title" type="string" value="Start"/>
 		</node>
-		<node uid="ef4d700a-fa05-43b9-ba5d-a19f46d3308e" class="minimalIO.TextOutputNode">
+		<node uid="ef4d700a-fa05-43b9-ba5d-a19f46d3308e" class="plugin.TextOutputNode">
 			<graphics x="368" y="294" fill="#00b200"/>
 			<att name="title" type="string" value="TextOutput"/>
 			<att name="prompt" type="text">

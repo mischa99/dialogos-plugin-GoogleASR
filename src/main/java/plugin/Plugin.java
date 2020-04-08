@@ -1,4 +1,4 @@
-package minimalIO;
+package plugin;
 
 import com.clt.dialogos.plugin.PluginRuntime;
 import com.clt.dialogos.plugin.PluginSettings;
@@ -17,23 +17,25 @@ import java.util.Arrays;
 public class Plugin implements com.clt.dialogos.plugin.Plugin {
     @Override
     public void initialize() {
-        Node.registerNodeTypes(com.clt.speech.Resources.getResources().createLocalizedString("IONode"),
-                Arrays.asList(TextInputNode.class, TextOutputNode.class));
+       // getRecognizer(); // to perform one-time initialization work at DialogOS startup time
+        Node.registerNodeTypes(com.clt.speech.Resources.getResources().createLocalizedString("GoogleSpeechToTextNode"),
+                Arrays.asList(SpeechToTextNode.class));
     }
+
 
     @Override
     public String getId() {
-        return "minimalIO";
+        return "GoogleSpeechToText";
     }
 
     @Override
     public String getName() {
-        return "DialogOS MinimalIO Plugin";
+        return "Google Cloud Speech-to-Text Plugin";
     }
 
     @Override
     public Icon getIcon() {
-        return UIManager.getIcon("FileView.computerIcon");
+        return null;
     }
 
     @Override
