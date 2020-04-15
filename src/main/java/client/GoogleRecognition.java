@@ -21,6 +21,16 @@ import java.util.ArrayList;
 
 public class GoogleRecognition extends AbstractRecognizer {
 
+    // The language of the supplied audio. Even though additional languages are
+    // provided by alternative_language_codes, a primary language is still required.
+    String languageCode = "fr";
+
+    // Specify up to 3 additional languages as possible alternative languages
+    // of the supplied audio.
+    String alternativeLanguageCodesElement = "es";
+    String alternativeLanguageCodesElement2 = "en";
+
+
     public GoogleRecognition() {
 
     }
@@ -59,7 +69,7 @@ public class GoogleRecognition extends AbstractRecognizer {
      * Code available at  https://cloud.google.com/speech-to-text/docs/streaming-recognize
      * @return most likely Result (no alternatives)
      */
-    private String attemptRecognition() {
+    private String attemptRecognition(/**String languageCode, Optional<List<String>> alternativeLanguagesCodes**/) {
         //String stringResult = "";
         StringBuilder sb = new StringBuilder();
        // final SimpleRecognizerResult[] simpleResult = new SimpleRecognizerResult[1];
@@ -78,14 +88,13 @@ public class GoogleRecognition extends AbstractRecognizer {
 
                         public void onComplete() {
                             for (StreamingRecognizeResponse response : responses) {
-                                StreamingRecognitionResult result = response.getResultsList().get(0);
+                                //response.getSpeechEventType() //can return END_OF_SINGLE_UTTERANCE if singe_utterance was set true in confif
+                                StreamingRecognitionResult result = response.getResultsList().get(0); //opt: .getIsFinal() if temporary results set true
+                                //optional: result.getStability // estimates (val between 0.00-1.00), if given result is likely to change/get optimized
                                 SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
                                 //System.out.printf("Transcript : %s\n", alternative.getTranscript());
-                                //stringResult = alternative.getTranscript();
                                 sb.append(alternative.getTranscript());
                             }
-                            //simpleResult[0] = new SimpleRecognizerResult(stringResult);
-                            //return simpleResult[0];
                         }
 
                         public void onError(Throwable t) {
@@ -95,20 +104,25 @@ public class GoogleRecognition extends AbstractRecognizer {
 
             ClientStream<StreamingRecognizeRequest> clientStream =
                     client.streamingRecognizeCallable().splitCall(responseObserver);
+            //configeration of recognizer
+            RecognitionConfig recognitionConfig;
+            recognitionConfig =
+                   RecognitionConfig.newBuilder()
+                           .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
+                           .setLanguageCode(languageCode)
+                           //.addAllAlternativeLanguageCodes(alternativeLanguagesCodes) method name changed
+                           .setSampleRateHertz(16000)
 
-            RecognitionConfig recognitionConfig =
-                    RecognitionConfig.newBuilder()
-                            .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                            .setLanguageCode("en-US")
-                            .setSampleRateHertz(16000)
-                            .build();
+                           .build();
+            //optional: setSingleUtterance(boolean val) // request will be stopped if no more language recognized (useful for commands)
+            //optinal: setInterimResults() // returns temporary results that can be otimized later (after more audio is being processed)
             StreamingRecognitionConfig streamingRecognitionConfig =
                     StreamingRecognitionConfig.newBuilder().setConfig(recognitionConfig).build();
 
             StreamingRecognizeRequest request =
                     StreamingRecognizeRequest.newBuilder()
                             .setStreamingConfig(streamingRecognitionConfig)
-                            .build(); // The first request in a streaming call has to be a config
+                            .build(); // The first request in a streaming call has to be a config, no audio
 
             clientStream.send(request);
             // SampleRate:16000Hz, SampleSizeInBits: 16, Number of channels: 1, Signed: true,

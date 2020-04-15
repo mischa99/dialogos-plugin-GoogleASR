@@ -12,17 +12,17 @@ import com.clt.srgf.Grammar;
 import com.google.api.gax.rpc.ClientStream;
 import com.google.api.gax.rpc.ResponseObserver;
 import com.google.api.gax.rpc.StreamController;
-//Import the Google Cloud client library
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+import org.jsoup.Jsoup;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-
+//Import the Google Cloud client library
 
 
 /**
@@ -184,7 +184,25 @@ public class SpeechToTextNode extends AbstractInputNode {
 
     @Override
     public List<LanguageName> getAvailableLanguages() {
-        return new ArrayList<LanguageName>(Arrays.asList(defaultLanguage));
+        org.jsoup.nodes.Document doc = null;
+        ArrayList<LanguageName> list = new ArrayList<LanguageName>(Arrays.asList(defaultLanguage));
+        try {
+            doc = Jsoup.connect("https://cloud.google.com/speech-to-text/docs/languages").get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        org.jsoup.select.Elements rows = doc.select("tr");
+        for(org.jsoup.nodes.Element row :rows)
+        {
+            org.jsoup.select.Elements columns = row.select("td");
+            for (org.jsoup.nodes.Element column:columns)
+            {
+                System.out.print(column.text());
+                list.add(new LanguageName("", column.text()));
+            }
+            System.out.println();
+        }
+        return list;
     }
 
     @Override
@@ -192,6 +210,7 @@ public class SpeechToTextNode extends AbstractInputNode {
         return defaultLanguage;
     }
    // private static Device googleDevice = new Device(Resources.getString("Google"));
+
 
 }
 
