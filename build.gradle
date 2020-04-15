@@ -17,11 +17,12 @@ repositories {
 
 dependencies {
   implementation(group:'com.github.dialogos-project', name:'dialogos', version:'v2.0.1') {
-    
+    exclude module: 'DialogOS_SphinxPlugin'
+    exclude module: 'DialogOS_MaryTTSPlugin'
   }
-  compile (group: 'com.google.guava', name: 'guava', version: '26.0-jre')
-  implementation group: 'com.google.api.grpc', name: 'grpc-google-cloud-speech-v1', version: '1.21.0'
-  compile 'com.google.cloud:google-cloud-speech:1.21.0'
+/*  compile (group: 'com.google.guava', name: 'guava', version: '26.0-jre') */
+/*  implementation group: 'com.google.api.grpc', name: 'grpc-google-cloud-speech-v1', version: '1.22.6' */
+  compile 'com.google.cloud:google-cloud-speech:1.22.6'
 }
 mainClassName = 'com.clt.dialogos.DialogOS'
 def version = 1.0
