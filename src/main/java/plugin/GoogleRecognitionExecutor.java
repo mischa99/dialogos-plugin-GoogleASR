@@ -1,5 +1,6 @@
 package plugin;
 
+import client.GoogleRecognition;
 import com.clt.diamant.graph.nodes.AbstractInputNode;
 import com.clt.script.exp.Pattern;
 import com.clt.speech.recognition.*;
@@ -16,7 +17,7 @@ public class GoogleRecognitionExecutor implements RecognitionExecutor {
     }
 
     public GoogleRecognitionExecutor() {
-
+        recognizer = new GoogleRecognition();
     }
 
     public MatchResult start(final Grammar grammar, final Pattern[] patterns, long timeout, final RecognizerListener stateListener, final float recognitionThreshold)

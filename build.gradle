@@ -20,15 +20,16 @@ dependencies {
     exclude module: 'DialogOS_SphinxPlugin'
     exclude module: 'DialogOS_MaryTTSPlugin'
   }
-<<<<<<< HEAD
-  compile (group: 'com.google.guava', name: 'guava', version: '26.0-jre')
-  implementation group: 'com.google.api.grpc', name: 'grpc-google-cloud-speech-v1', version: '1.21.0'
-  compile 'com.google.cloud:google-cloud-speech:1.21.0'
-=======
+
 /*  compile (group: 'com.google.guava', name: 'guava', version: '26.0-jre') */
 /*  implementation group: 'com.google.api.grpc', name: 'grpc-google-cloud-speech-v1', version: '1.22.6' */
   compile 'com.google.cloud:google-cloud-speech:1.22.6'
->>>>>>> bc2c0d9a261fa3811f23e01c73df1ad7e56d1d38
+  implementation 'junit:junit:4.12'
+  compile 'com.google.cloud:google-cloud-storage:1.107.0'
+  // jsoup HTML parser library @ https://jsoup.org/
+  compile 'org.jsoup:jsoup:1.13.1'
+
+
 }
 mainClassName = 'com.clt.dialogos.DialogOS'
 def version = 1.0
