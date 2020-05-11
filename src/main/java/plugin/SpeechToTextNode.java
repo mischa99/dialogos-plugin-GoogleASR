@@ -2,7 +2,6 @@ package plugin;
 
 import com.clt.diamant.Device;
 import com.clt.diamant.InputCenter;
-import com.clt.diamant.graph.nodes.AbstractInputNode;
 import com.clt.diamant.graph.nodes.NodeExecutionException;
 import com.clt.script.exp.patterns.VarPattern;
 import com.clt.speech.Language;
@@ -20,7 +19,7 @@ import java.util.Locale;
 /**
  * Created by Mikhail on 17.02.20.
  */
-public class SpeechToTextNode extends AbstractInputNode {
+public class SpeechToTextNode extends AbstractGoogleNode {
 
 
 
@@ -62,7 +61,7 @@ public class SpeechToTextNode extends AbstractInputNode {
     public List<LanguageName> getAvailableLanguages() {
         ArrayList<LanguageName> list = new ArrayList<LanguageName>();
         LanguageName d = new LanguageName("Deutsch", new Language(Locale.GERMANY));
-        //list.add(d);
+        list.add(d);
         list.add(new LanguageName("English-US", new Language(Locale.US)));
         return list;
     }

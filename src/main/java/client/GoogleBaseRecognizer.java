@@ -19,4 +19,5 @@ public abstract class GoogleBaseRecognizer extends SingleDomainRecognizer {
     @Override public String[] transcribe(String word, Language language) throws SpeechException {
         return new String[]{};
     }
+
 }

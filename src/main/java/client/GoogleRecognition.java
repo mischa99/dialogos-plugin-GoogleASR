@@ -1,5 +1,6 @@
 package client;
 
+import com.clt.speech.Language;
 import com.clt.speech.SpeechException;
 import com.clt.speech.recognition.Domain;
 import com.clt.speech.recognition.RecognitionContext;
@@ -12,6 +13,7 @@ import com.google.api.gax.rpc.StreamController;
 import com.google.cloud.speech.v1.*;
 import com.google.cloud.speech.v1p1beta1.SpeechContext;
 import com.google.protobuf.ByteString;
+import plugin.AbstractGoogleNode;
 
 import javax.sound.sampled.*;
 import java.util.ArrayList;
@@ -50,8 +52,17 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     @Override protected SimpleRecognizerResult startImpl() throws SpeechException {
         fireRecognizerEvent(RecognizerEvent.RECOGNIZER_LOADING);
         SimpleRecognizerResult result;
+        /** klappt noch nicht, NullPointer
+        Language l = (Language) AbstractGoogleNode.SELECTED_LANGUAGE;
+        if(l.getName() == "Deutsch")
+            languageCode = "de";
+        if(l.getName() == "US-English")
+            languageCode ="en-US";
+         */
+        boolean iR = AbstractGoogleNode.SELECTED_INTERIM_RESULTS;
+        boolean sU = AbstractGoogleNode.SELECTED_SINGLE_UTTERANCE;
         recognitionConfig = getRecognizerConfiguration("en-US",1);
-        streamingRecognitionConfig = getStreamingConfiguration(true,false);
+        streamingRecognitionConfig = getStreamingConfiguration(iR,sU);
         responseObserver = createObserver();
 
         do {
@@ -84,7 +95,11 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
     @Override
     protected RecognitionContext createContext(String s, Grammar grammar, Domain domain, long timestamp) throws SpeechException {
-        return null;
+        Language l = (Language) AbstractGoogleNode.SELECTED_LANGUAGE;
+
+        return new RecognitionContext(s,domain,l,grammar);
+
+        //return null;
 
     }
 
@@ -117,7 +132,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
         streamingRecognitionConfig =
                 StreamingRecognitionConfig.newBuilder().setConfig(recognitionConfig)
                         .setInterimResults(interimResult) // returns temporary results that can be otimized later (after more audio is being processed)
-                        //if singleUtterance true then no InterimResults?
+                        //if singleUtterance true then no InterimResults
                         .setSingleUtterance(singleUtterance) // request will be stopped if no more language recognized (useful for commands)
                         .build();
 
@@ -136,8 +151,16 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                         if(result.getIsFinal()==false) {
                             SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
                             System.out.printf("Interim Result : %s\n", alternative.getTranscript());
-                            System.out.printf("Stability: %s\n", result.getStability()); //creates error message
-                            //fireRecognizerEvent(RecognizerEvent.PARTIAL_RESULT,alternative);
+                            System.out.printf("Stability: %s\n", result.getStability());
+                            /**
+                            sb.append("(Interim Result: ");
+                            sb.append(alternative.getTranscript());
+                            sb.append(",");
+                            sb.append("Stability: ");
+                            sb.append(result.getStability());
+                            sb.append(")");
+                             */
+
                         }
                         responses.add(response);
                     }
@@ -155,6 +178,11 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                                 if(alternative.getConfidence() > 0.0){ //0.0 is default if no confidence available
                                     System.out.printf("Google's Final Result : %s\n", alternative.getTranscript());
                                     System.out.printf("Final Result Confidence: %s\n", alternative.getConfidence());
+                                    /**
+                                    sb.append("(Final Result Confidence: ");
+                                    sb.append(alternative.getConfidence());
+                                    sb.append(")");
+                                     */
                                 }
                             }
                         }
@@ -193,7 +221,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     }
 
     /**
-     * Performs microphone streaming speech recognition with a duration of 1 minute.
+     * Performs microphone streaming speech recognition with a duration of 10 seconds.
      * Code available at  https://cloud.google.com/speech-to-text/docs/streaming-recognize
      */
     public String attemptRecognition(){
@@ -253,13 +281,11 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
             System.out.println(e);
             }
         responseObserver.onComplete();
-       // System.out.println("Googles result is:" + sb.toString());
         return sb.toString();
     }
 
     @Override
     public void setContext(RecognitionContext recognitionContext) throws SpeechException {
-
     }
 
     @Override

@@ -28,7 +28,6 @@ public class GoogleRecognitionExecutor implements RecognitionExecutor {
         Future<MatchResult> result = Executors.newSingleThreadExecutor().submit(() -> {
             // all that is relevant to context, thus including the recognition threshold!
             recognizer.setContext(grammar);
-
             if (stateListener != null) {
                 recognizer.addRecognizerListener(stateListener);
             }
