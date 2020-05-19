@@ -28,23 +28,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public abstract class AbstractGoogleNode extends AbstractInputNode {
-
     private static ImageIcon micInv = null;
     private static ImageIcon micOn = null;
     private static ImageIcon micOff = null;
-    private static final float DEFAULT_THRESHOLD = 0.0F;
-    private static final String TIMEOUT = "timeout";
-    private static final String FORCE_TIMEOUT = "forceTimeout";
-    private static final String GRAMMAR = "grammar";
-    private static final String GRAMMAR_EXPRESSION = "grammarExpression";
-    private static final String LANGUAGE = "language";
-    private static final String BACKGROUND = "background";
+
     protected static final String ENABLE_GARBAGE = "enableGarbage";
-    protected static final String THRESHOLD = "threshold";
     private static Object DIRECT_GRAMMAR = new Object() {
         public String toString() {
             return Resources.getString("DirectGrammar");
@@ -55,7 +47,6 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
             return Resources.getString("DynamicGrammar");
         }
     };
-    private static final boolean supportDynamicGrammars = true;
 
     public static Object SELECTED_LANGUAGE = null;
     public static boolean SELECTED_INTERIM_RESULTS = false;
@@ -329,6 +320,12 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         gbc.weighty = 0.0D;
         gbc.weightx = 1.0D;
         gbc.gridwidth = 2;
+
+
+
+
+
+        //!!!
         ///NEW PARAMETERS HERE
         JCheckBox interimResults = NodePropertiesDialog.createCheckBox(properties, "allow Interim Results", Resources.getString("allow Interim Results"));
         options.add(interimResults, gbc);
@@ -336,9 +333,14 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         gbc.weighty = 0.0D;
         gbc.weightx = 1.0D;
         gbc.gridwidth = 2;
+
+        interimResults.setSelected(true);
+        SELECTED_INTERIM_RESULTS = true;
         interimResults.addItemListener(new ItemListener() {
+
             public void itemStateChanged(ItemEvent evt) {
                 //interimResults.setEnabled(timeout.isSelected());
+
                 if (interimResults.isSelected()) {
                     SELECTED_INTERIM_RESULTS = true;
                 } else {
@@ -368,6 +370,9 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
 
             }
         });
+
+
+
 
         JPanel threshold = new JPanel(new FlowLayout(0, 6, 6));
         threshold.add(new JLabel(Resources.getString("threshold")));
@@ -420,6 +425,7 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         tabs.addTab(Resources.getString("RecognitionTab"), mainPage);
         tabs.addTab(Resources.getString("Options"), options);
         return tabs;
+
     }
 
 }
