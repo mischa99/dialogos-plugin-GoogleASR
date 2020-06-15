@@ -48,7 +48,7 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         }
     };
 
-    public static Object SELECTED_LANGUAGE = null;
+    public static LanguageName SELECTED_LANGUAGE = null;
     public static boolean SELECTED_INTERIM_RESULTS = false;
     public static boolean SELECTED_SINGLE_UTTERANCE = false;
 
@@ -96,6 +96,15 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
 
             }
         });
+
+        language.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JComboBox cb = (JComboBox)e.getSource();
+                SELECTED_LANGUAGE = (LanguageName) cb.getSelectedItem();
+            }
+        });
+
         grammar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 language.setEnabled(true);

@@ -20,7 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+/**
+ * @author mikhail
+ * List of TODOs:
+ *
+ */
 public class GoogleRecognition extends GoogleBaseRecognizer {
 
     boolean stopping= false;
@@ -30,7 +34,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     StreamingRecognitionConfig streamingRecognitionConfig;
     StreamingRecognizeRequest request; //transmit request to Google with this Object
     private StringBuilder sb = new StringBuilder(); //to create result in iterative manner
-
+    String languageCode;
 
     public GoogleRecognition() {
 
@@ -40,18 +44,27 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     @Override protected SimpleRecognizerResult startImpl() throws SpeechException {
         fireRecognizerEvent(RecognizerEvent.RECOGNIZER_LOADING);
         SimpleRecognizerResult result;
-        /** does not work yet, NullPointer
-        Language l = (Language) AbstractGoogleNode.SELECTED_LANGUAGE;
+
+        Language l = new Language (String.valueOf(AbstractGoogleNode.SELECTED_LANGUAGE));
         if(l.getName() == "Deutsch")
-            languageCode = "de";
-        if(l.getName() == "US-English")
+            languageCode = "de-DE";
+        if(l.getName() == "US English")
             languageCode ="en-US";
-         */
+        if(l.getName() == "Español")
+            languageCode="es-ES";
+        if(l.getName() == "Français")
+            languageCode="fr-FR";
         boolean iR = AbstractGoogleNode.SELECTED_INTERIM_RESULTS;
         boolean sU = AbstractGoogleNode.SELECTED_SINGLE_UTTERANCE;
-        recognitionConfig = getRecognizerConfiguration("en-US",1);
-        streamingRecognitionConfig = getStreamingConfiguration(iR,sU); // false because not working yet
-        responseObserver = createObserver();
+        try {
+            recognitionConfig = getRecognizerConfiguration(languageCode, 1);
+            streamingRecognitionConfig = getStreamingConfiguration(iR, sU);
+            responseObserver = createObserver();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            throw new SpeechException(e);
+        }
 
         do {
             result = new SimpleRecognizerResult(attemptRecognition());
@@ -80,8 +93,8 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     }
 
     @Override
-    protected RecognitionContext createContext(String s, Grammar grammar, Domain domain, long timestamp) throws SpeechException {
-        Language l = (Language) AbstractGoogleNode.SELECTED_LANGUAGE;
+    protected RecognitionContext createContext(String s, Grammar grammar, Domain domain, long timestamp)  {
+        Language l = new Language(String.valueOf(AbstractGoogleNode.SELECTED_LANGUAGE));
         return new RecognitionContext(s,domain,l,grammar);
     }
 
@@ -93,11 +106,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
     RecognitionConfig getRecognizerConfiguration(String languageCode, int maxAlternatives) {
         assert(maxAlternatives<=30 && maxAlternatives >= 0) : "you can only allow maxAlternatives to be between 0 and 30";
-        /**
-        if(maxAlternatives==null) {
-            maxAlternatives=1;
-        }
-         */
+
         recognitionConfig =
                 RecognitionConfig.newBuilder()
                         .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
@@ -119,7 +128,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                         .setSingleUtterance(singleUtterance) // request will be stopped if no more language recognized (useful for commands)
                         .build();
 
-        return streamingRecognitionConfig;
+    return streamingRecognitionConfig;
     }
 
     ResponseObserver<StreamingRecognizeResponse> createObserver() {
@@ -148,16 +157,17 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                             fireRecognizerEvent(interimResult);
 
                         }
-
+    /**
                         if(response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE) {
                             responses.add(response);
                         }
+     */
                         responses.add(response);
                     }
 
 
                     public void onComplete() {
-                        /** in work; trying to figure out how to mae single Utterance functionality running
+                        /** in work; trying to figure out how to make single Utterance functionality running
                         StreamingRecognizeResponse _response = responses.get(0);
                         if(_response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE) {
                             StreamingRecognitionResult _result = _response.getResultsList().get(0);
@@ -195,7 +205,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                     }
 
                     public void onError(Throwable t) {
-                        System.out.println("ERROR @GOOGLE_RESPONSEOBSERVER: "+ t);
+                        System.out.println("ERROR @GOOGLE_RESPONSE_OBSERVER.: "+ t);
                     }
                 };
         return responseObserver;
@@ -227,7 +237,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
     }
 
     /**
-     * Performs microphone streaming speech recognition with a duration of 10 seconds.
+     * Performs microphone streaming speech recognition with a duration of 5 seconds.
      * Code available at  https://cloud.google.com/speech-to-text/docs/streaming-recognize
      */
     public String attemptRecognition(){
@@ -268,7 +278,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                 long estimatedTime = System.currentTimeMillis() - startTime;
                 byte[] data = new byte[6400];
                 audio.read(data);
-                if (estimatedTime > 5000) { // 5 seconds
+                if (estimatedTime > 10000) { // 5 seconds
                     System.out.println("Stop speaking.");
                     targetDataLine.stop();
                     targetDataLine.close();

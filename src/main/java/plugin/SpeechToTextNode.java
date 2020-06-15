@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 //import org.jsoup.Jsoup;
-//Import the Google Cloud client library
+
 
 
 /**
@@ -63,6 +63,8 @@ public class SpeechToTextNode extends AbstractGoogleNode {
         LanguageName d = new LanguageName("Deutsch", new Language(Locale.GERMANY));
         list.add(d);
         list.add(new LanguageName("English-US", new Language(Locale.US)));
+        list.add(new LanguageName("Français", new Language(Locale.FRANCE)));
+        list.add(new LanguageName("Español", new Language(new Locale("es", "ES"))));
         return list;
     }
 

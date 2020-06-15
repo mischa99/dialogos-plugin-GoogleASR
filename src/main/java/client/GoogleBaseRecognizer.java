@@ -3,8 +3,9 @@ package client;
 import com.clt.properties.Property;
 import com.clt.speech.Language;
 import com.clt.speech.SpeechException;
-import edu.cmu.lti.dialogos.sphinx.client.SingleDomainRecognizer;
-
+import edu.cmu.lti.dialogos.sphinx.client.SingleDomainRecognizer;//remove this
+// class moved in Dialogos to clt.speech
+//import com.clt.speech.recognition.SingleDomainRecognizer;
 import javax.sound.sampled.AudioFormat;
 
 public abstract class GoogleBaseRecognizer extends SingleDomainRecognizer {
