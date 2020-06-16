@@ -48,9 +48,10 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         }
     };
 
-    public static LanguageName SELECTED_LANGUAGE = null;
+    public static LanguageName SELECTED_LANGUAGE = new LanguageName("US English", new Language(Locale.US)); //avoid null pointer when loading a file and no action performed on JComboBox
     public static boolean SELECTED_INTERIM_RESULTS = false;
     public static boolean SELECTED_SINGLE_UTTERANCE = false;
+    public static int SELECTED_CONFIDENCE = 0;
 
     @Override
     public JComponent createEditorComponent(final Map<String, Object> properties) {
@@ -125,7 +126,6 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
                                 ln = (LanguageName)var7.next();
                                 if (ln.getLanguage().equals(l)) {
                                     grammarLanguage = ln;
-                                    language.setSelectedItem(SELECTED_LANGUAGE);
                                     break;
                                 }
                             }
@@ -137,7 +137,6 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
                                     ln = (LanguageName)var7.next();
                                     if (ln.getLanguage().getLocale().getLanguage().equals(l.getLocale().getLanguage())) {
                                         grammarLanguage = ln;
-                                        language.setSelectedItem(SELECTED_LANGUAGE);
                                         break;
                                     }
                                 }
@@ -145,9 +144,7 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
 
                             if (grammarLanguage != null) {
                                 language.setSelectedItem(grammarLanguage);
-                                language.setSelectedItem(SELECTED_LANGUAGE);
                             }
-                            language.setSelectedItem(SELECTED_LANGUAGE);
                             language.setEnabled(false);
                         }
                     } catch (Exception var9) {
@@ -385,7 +382,8 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
 
         JPanel threshold = new JPanel(new FlowLayout(0, 6, 6));
         threshold.add(new JLabel(Resources.getString("threshold")));
-        threshold.add(NodePropertiesDialog.createLongField(properties, "threshold", 0L, 100L));
+        JTextField ts = NodePropertiesDialog.createLongField(properties, "threshold", 0L, 100L);
+        threshold.add(ts);
         threshold.add(new JLabel("%"));
         options.add(threshold, gbc);
         ++gbc.gridy;
@@ -394,6 +392,14 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         gbc.gridwidth = 2;
         gbc.insets = insets;
         options.add(Box.createVerticalGlue(), gbc);
+
+        ts.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SELECTED_CONFIDENCE = Integer.parseInt(ts.getText());
+            }
+        });
+
         final JButton test = new JButton(Resources.getString("TryRecognition"));
         test.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

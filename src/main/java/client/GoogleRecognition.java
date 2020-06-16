@@ -28,6 +28,7 @@ import java.util.List;
 public class GoogleRecognition extends GoogleBaseRecognizer {
 
     boolean stopping= false;
+    boolean end_of_speech=false;
     ResponseObserver<StreamingRecognizeResponse> responseObserver;
     //configuration of recognizer
     RecognitionConfig recognitionConfig;
@@ -45,7 +46,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
         fireRecognizerEvent(RecognizerEvent.RECOGNIZER_LOADING);
         SimpleRecognizerResult result;
 
-        Language l = new Language (String.valueOf(AbstractGoogleNode.SELECTED_LANGUAGE));
+        Language l = new Language (AbstractGoogleNode.SELECTED_LANGUAGE.getName());
         if(l.getName() == "Deutsch")
             languageCode = "de-DE";
         if(l.getName() == "US English")
@@ -94,7 +95,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
     @Override
     protected RecognitionContext createContext(String s, Grammar grammar, Domain domain, long timestamp)  {
-        Language l = new Language(String.valueOf(AbstractGoogleNode.SELECTED_LANGUAGE));
+        Language l = new Language(AbstractGoogleNode.SELECTED_LANGUAGE.getName());
         return new RecognitionContext(s,domain,l,grammar);
     }
 
@@ -143,7 +144,8 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                     public void onResponse(StreamingRecognizeResponse response) {
 
                         StreamingRecognitionResult result = response.getResultsList().get(0);
-
+                        System.out.println("DEBUGGING: MR1 result final: " + result.getIsFinal());
+                        System.out.println("MR2 response result val:" + result.getAlternativesList().get(0).getTranscript());
                         if(result.getIsFinal()==false) {
                             SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
                             //System.out.printf("Interim Result : %s\n", alternative.getTranscript());
@@ -157,11 +159,13 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                             fireRecognizerEvent(interimResult);
 
                         }
-    /**
+                        System.out.println("MR3.1 event int:" + response.getSpeechEventTypeValue());
                         if(response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE) {
+                            System.out.println("MR3 event received");
+                            end_of_speech = true;
                             responses.add(response);
                         }
-     */
+
                         responses.add(response);
                     }
 
@@ -194,12 +198,11 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                                    if (result.getIsFinal() == true) { //opt: .getIsFinal() if temporary results set true
                                         SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
                                         sb.append(alternative.getTranscript());
-                                     //   if (alternative.getConfidence() > 0.0) { //0.0 is default if no confidence available
-                                        //    System.out.printf("Google's Final Result : %s\n", alternative.getTranscript());
-                                       //     System.out.printf("Final Result Confidence: %s\n", alternative.getConfidence());
-
+                                        if (alternative.getConfidence() > AbstractGoogleNode.SELECTED_CONFIDENCE) { //0.0 is default if no confidence available
+                                            System.out.printf("Google's Final Result : %s\n", alternative.getTranscript());
+                                            System.out.printf("Final Result Confidence: %s\n", alternative.getConfidence());
                                        }
-                                   // }
+                                    }
                                 }
                            // }
                     }
@@ -274,11 +277,11 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
             long startTime = System.currentTimeMillis();
             // Audio Input Stream
             AudioInputStream audio = new AudioInputStream(targetDataLine);
-            while (true) {
+            while (end_of_speech==false) {
                 long estimatedTime = System.currentTimeMillis() - startTime;
                 byte[] data = new byte[6400];
                 audio.read(data);
-                if (estimatedTime > 10000) { // 5 seconds
+                if (estimatedTime > 5000) { // 5 seconds
                     System.out.println("Stop speaking.");
                     targetDataLine.stop();
                     targetDataLine.close();

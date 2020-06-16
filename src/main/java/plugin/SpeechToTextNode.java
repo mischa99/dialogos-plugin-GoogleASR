@@ -24,7 +24,7 @@ public class SpeechToTextNode extends AbstractGoogleNode {
 
 
     public SpeechToTextNode() {
-
+        //TODO: load JComboBox language value from opened file, then initialize AbstractGoogleNode.SELECTED_LANGUAGE with it
     }
 
 
@@ -55,14 +55,15 @@ public class SpeechToTextNode extends AbstractGoogleNode {
         throw new NodeExecutionException(this, "TextInputNode does not support background recognition");
     }
 
-    private LanguageName defaultLanguage = new LanguageName("", null);
+    protected static LanguageName defaultLanguage = new LanguageName("US English", new Language(Locale.US));
+    //private LanguageName defaultLanguage1 = new LanguageName("", null);
 
     @Override
     public List<LanguageName> getAvailableLanguages() {
         ArrayList<LanguageName> list = new ArrayList<LanguageName>();
         LanguageName d = new LanguageName("Deutsch", new Language(Locale.GERMANY));
         list.add(d);
-        list.add(new LanguageName("English-US", new Language(Locale.US)));
+        list.add(new LanguageName("US English", new Language(Locale.US)));
         list.add(new LanguageName("Français", new Language(Locale.FRANCE)));
         list.add(new LanguageName("Español", new Language(new Locale("es", "ES"))));
         return list;
