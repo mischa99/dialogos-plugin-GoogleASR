@@ -15,7 +15,9 @@
 		<node uid="374bb734-be33-4e2b-a86f-620b1151d4a4" class="plugin.SpeechToTextNode">
 			<graphics x="354" y="212" fill="#b20000"/>
 			<att name="title" type="string" value="SpeechToText"/>
-			<att name="language" type="string" value="Español"/>
+			<att name="language" type="string" value="US English"/>
+			<att name="US English" type="string" value="US English"/>
+			<att name="US English" type="LanguageName" value="US English"/>
 		</node>
 		<node uid="be81ad66-a050-4472-a63c-47ec3d1439d5" class="com.clt.diamant.graph.nodes.StartNode">
 			<graphics x="370" y="40" fill="#9999ff"/>

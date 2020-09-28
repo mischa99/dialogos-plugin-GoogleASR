@@ -20,6 +20,8 @@ import com.clt.speech.Language;
 import com.clt.speech.recognition.LanguageName;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -48,10 +50,13 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         }
     };
 
-    public static LanguageName SELECTED_LANGUAGE = new LanguageName("US English", new Language(Locale.US)); //avoid null pointer when loading a file and no action performed on JComboBox
+    public static LanguageName SELECTED_LANGUAGE = null;
+    public static String SELECTED_LANGUAGE_NAME = null;
+    //public static LanguageName SELECTED_LANGUAGE = new LanguageName("US English", new Language(Locale.US)); //avoid null pointer when loading a file and no action performed on JComboBox
+    public static LanguageName SAVE_SELECTED_LANGUAGE;
     public static boolean SELECTED_INTERIM_RESULTS = false;
     public static boolean SELECTED_SINGLE_UTTERANCE = false;
-    public static int SELECTED_CONFIDENCE = 0;
+    public static double SELECTED_CONFIDENCE = 0.0;
 
     @Override
     public JComponent createEditorComponent(final Map<String, Object> properties) {
@@ -67,7 +72,7 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         Vector<Object> grammars = new Vector();
         grammars.add(DIRECT_GRAMMAR);
         grammars.add(DYNAMIC_GRAMMAR);
-        List<com.clt.diamant.Grammar> definedGrammars = this.getGraph().getOwner().getGrammars();
+        List<Grammar> definedGrammars = this.getGraph().getOwner().getGrammars();
         if (!definedGrammars.isEmpty()) {
             grammars.add(new JSeparator());
             grammars.addAll(definedGrammars);
@@ -103,14 +108,15 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
             public void actionPerformed(ActionEvent e) {
                 JComboBox cb = (JComboBox)e.getSource();
                 SELECTED_LANGUAGE = (LanguageName) cb.getSelectedItem();
+                SELECTED_LANGUAGE_NAME = SELECTED_LANGUAGE.getName();
             }
         });
 
         grammar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 language.setEnabled(true);
-                if (grammar.getSelectedItem() instanceof com.clt.diamant.Grammar) {
-                    com.clt.diamant.Grammar g = (com.clt.diamant.Grammar)grammar.getSelectedItem();
+                if (grammar.getSelectedItem() instanceof Grammar) {
+                    Grammar g = (Grammar)grammar.getSelectedItem();
                     properties.put("grammar", g);
 
                     try {
@@ -169,7 +175,7 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
 
             }
         });
-        com.clt.diamant.Grammar g = (com.clt.diamant.Grammar)properties.get("grammar");
+        Grammar g = (Grammar)properties.get("grammar");
         if (g != null) {
             grammar.setSelectedItem(g);
         } else if (this.getProperty("grammarExpression") != null) {
@@ -345,7 +351,6 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         interimResults.addItemListener(new ItemListener() {
 
             public void itemStateChanged(ItemEvent evt) {
-                //interimResults.setEnabled(timeout.isSelected());
 
                 if (interimResults.isSelected()) {
                     SELECTED_INTERIM_RESULTS = true;
@@ -365,7 +370,6 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         gbc.gridwidth = 2;
         singleUtterance.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent evt) {
-                //singleUtterence.setEnabled(singleUtterence.isSelected());
                 if (singleUtterance.isSelected() & !(interimResults.isSelected())) {
                     SELECTED_SINGLE_UTTERANCE = true;
                 }
@@ -392,13 +396,31 @@ public abstract class AbstractGoogleNode extends AbstractInputNode {
         gbc.gridwidth = 2;
         gbc.insets = insets;
         options.add(Box.createVerticalGlue(), gbc);
-
+    /**
         ts.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SELECTED_CONFIDENCE = Integer.parseInt(ts.getText());
             }
+            //try out TextListener with textValueChanged()
         });
+     */
+        ts.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                getText();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                getText();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                getText();
+            }
+
+            public void getText() {
+                SELECTED_CONFIDENCE = Integer.parseInt(ts.getText());
+                }
+            }
+        );
 
         final JButton test = new JButton(Resources.getString("TryRecognition"));
         test.addActionListener(new ActionListener() {

@@ -16,6 +16,7 @@ import com.google.protobuf.ByteString;
 import plugin.AbstractGoogleNode;
 
 import javax.sound.sampled.*;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,12 +24,17 @@ import java.util.List;
 /**
  * @author mikhail
  * List of TODOs:
- *
+ *-control recognition duration with end_of_speech variable: true if SpeechRecognitionResponse in ResponseObserver contains
+ * END_OF_SINGLE_UTTERANCE EventType. Only receivable if singleUtterance set to true in Configuration. Does not work, although set to true
+ * - what to do if result confidance < set threshold (no match?, new message?)
+ * - get all Languages available for Google's API
  */
 public class GoogleRecognition extends GoogleBaseRecognizer {
 
     boolean stopping= false;
-    boolean end_of_speech=false;
+
+    boolean end_of_speech=false; //controlling speech recognition time in #attemptRecognition, ResponseObserver can change value if END_OF_SINGE_UTTERANCE Event received
+
     ResponseObserver<StreamingRecognizeResponse> responseObserver;
     //configuration of recognizer
     RecognitionConfig recognitionConfig;
@@ -82,7 +88,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
     }
     /**
-     * Methods exists in Sphinx, need to figure out how to get the current grammar
+     * Methods exists in Sphinx to regulate duration of recognition, need to figure out how to get the current grammar
     private boolean isMatch(SpeechResult speechResult) {
         Grammar gr = context.getGrammar();
         return gr.match(result, gr.getRoot()) != null;
@@ -124,7 +130,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
         streamingRecognitionConfig =
                 StreamingRecognitionConfig.newBuilder().setConfig(recognitionConfig)
-                        .setInterimResults(interimResult) // returns temporary results that can be otimized later (after more audio is being processed)
+                        .setInterimResults(interimResult) // returns temporary results that can be optimized later (after more audio is being processed)
                         //if singleUtterance true then no InterimResults
                         .setSingleUtterance(singleUtterance) // request will be stopped if no more language recognized (useful for commands)
                         .build();
@@ -144,14 +150,12 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                     public void onResponse(StreamingRecognizeResponse response) {
 
                         StreamingRecognitionResult result = response.getResultsList().get(0);
-                        System.out.println("DEBUGGING: MR1 result final: " + result.getIsFinal());
-                        System.out.println("MR2 response result val:" + result.getAlternativesList().get(0).getTranscript());
+
                         if(result.getIsFinal()==false) {
                             SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-                            //System.out.printf("Interim Result : %s\n", alternative.getTranscript());
-                            //System.out.printf("Stability: %s\n", result.getStability());
+
                             SimpleRecognizerResult interimResult = new SimpleRecognizerResult(
-                                    //"Interim Result : " +
+
                                             alternative.getTranscript()
                                             //",Stability: " +
                                             //+ result.getStability() // estimates (val between 0.00-1.00), if given result is likely to change/get optimized
@@ -171,37 +175,29 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
 
 
                     public void onComplete() {
-                        /** in work; trying to figure out how to make single Utterance functionality running
-                        StreamingRecognizeResponse _response = responses.get(0);
-                        if(_response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE) {
-                            StreamingRecognitionResult _result = _response.getResultsList().get(0);
-                            if (_result.getIsFinal() == true) {
-                                SpeechRecognitionAlternative alternative = _result.getAlternativesList().get(0);
-                                sb.append(alternative.getTranscript());
-                                if (alternative.getConfidence() > 0.0) { //0.0 is default if no confidence available
-                                    System.out.printf("Google's Final Result : %s\n", alternative.getTranscript());
-                                    System.out.printf("Final Result Confidence: %s\n", alternative.getConfidence());
-                                    /**
-                                     sb.append("(Final Result Confidence: ");
-                                     sb.append(alternative.getConfidence());
-                                     sb.append(")");
-
-                                }
-                            }
-                        }
-                            else {
-                                */
                                 for (StreamingRecognizeResponse response : responses) {
-                                    //if(response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE ) { //can return END_OF_SINGLE_UTTERANCE if singe_utterance was set true in config
+                                    //if(response.getSpeechEventType() == StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE) //returns only if singleUtterance set true
+                                    //  end_of_speech=true; //stop listening to micro
                                     StreamingRecognitionResult result = response.getResultsList().get(0);
                                     //optional: result.getStability // estimates (val between 0.00-1.00), if given result is likely to change/get optimized
-                                   if (result.getIsFinal() == true) { //opt: .getIsFinal() if temporary results set true
-                                        SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-                                        sb.append(alternative.getTranscript());
-                                        if (alternative.getConfidence() > AbstractGoogleNode.SELECTED_CONFIDENCE) { //0.0 is default if no confidence available
-                                            System.out.printf("Google's Final Result : %s\n", alternative.getTranscript());
-                                            System.out.printf("Final Result Confidence: %s\n", alternative.getConfidence());
+                                    SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
+
+                                    if (result.getIsFinal() == true) {
+
+                                        double threshold = alternative.getConfidence();
+
+                                        if(threshold==0.0) //print result if no confidence available (0.0 is google's default val)
+                                            sb.append(alternative.getTranscript());
+
+                                        if (threshold >= AbstractGoogleNode.SELECTED_CONFIDENCE/100) {
+                                            sb.append(alternative.getTranscript());
+                                            System.out.printf("Final Result Confidence: %s\n", threshold);
                                        }
+                                        else {
+                                            JOptionPane.showMessageDialog(null,
+                                                    "Results Confidence ("+ threshold+ ") was lower then the set threshold in options (" + AbstractGoogleNode.SELECTED_CONFIDENCE/100 + ")", "Low Confidence Result",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                        }
                                     }
                                 }
                            // }
@@ -281,7 +277,7 @@ public class GoogleRecognition extends GoogleBaseRecognizer {
                 long estimatedTime = System.currentTimeMillis() - startTime;
                 byte[] data = new byte[6400];
                 audio.read(data);
-                if (estimatedTime > 5000) { // 5 seconds
+                if (estimatedTime > 5000 || end_of_speech==true) { // 5 seconds
                     System.out.println("Stop speaking.");
                     targetDataLine.stop();
                     targetDataLine.close();

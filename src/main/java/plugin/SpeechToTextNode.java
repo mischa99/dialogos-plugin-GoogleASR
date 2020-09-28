@@ -1,12 +1,17 @@
 package plugin;
 
 import com.clt.diamant.Device;
+import com.clt.diamant.IdMap;
 import com.clt.diamant.InputCenter;
+import com.clt.diamant.graph.Graph;
 import com.clt.diamant.graph.nodes.NodeExecutionException;
 import com.clt.script.exp.patterns.VarPattern;
 import com.clt.speech.Language;
 import com.clt.speech.recognition.LanguageName;
 import com.clt.srgf.Grammar;
+import com.clt.xml.XMLReader;
+import com.clt.xml.XMLWriter;
+import org.xml.sax.SAXException;
 
 import javax.sound.sampled.AudioFormat;
 import java.util.ArrayList;
@@ -21,10 +26,13 @@ import java.util.Locale;
  */
 public class SpeechToTextNode extends AbstractGoogleNode {
 
-
+    String lang_name = "";
+    String language = "";
 
     public SpeechToTextNode() {
         //TODO: load JComboBox language value from opened file, then initialize AbstractGoogleNode.SELECTED_LANGUAGE with it
+        AbstractGoogleNode.SELECTED_LANGUAGE= new LanguageName(lang_name,new Language(language));
+        System.out.println("MR" + lang_name + " ___ " +language);
     }
 
 
@@ -74,6 +82,45 @@ public class SpeechToTextNode extends AbstractGoogleNode {
         return defaultLanguage;
     }
 
+    @Override
+    public void writeAttributes(XMLWriter out, IdMap uid_map) {
+        super.writeAttributes(out, uid_map); //***saves graph information to file
+        /*
+        Slot v = (Slot) this.getProperty(RESULT_VAR);
+        if (v != null) {
+            try {
+                String uid = uid_map.variables.getKey(v);
+                Graph.printAtt(out, RESULT_VAR, uid);
+            } catch (Exception exn) {
+            } // variable deleted
+        }
+         */
+        Graph.printAtt(out, String.valueOf(SELECTED_LANGUAGE_NAME), AbstractGoogleNode.SELECTED_LANGUAGE_NAME); //save result_var in the file
+    Graph.printAtt(out,"LanguageName", String.valueOf(SELECTED_LANGUAGE), AbstractGoogleNode.SELECTED_LANGUAGE.getLanguage());
+
+    }
+
+
+
+    @Override
+    public void readAttribute(XMLReader r, String name, String value, IdMap uid_map) throws SAXException {
+        if (name.equals(SELECTED_LANGUAGE_NAME) && value!=null) {
+            //try {
+            this.setProperty(name, value);
+            lang_name = value;
+            // uid_map.variables.get(value) instead of value
+            //} catch (Exception exn) {
+            //    r.raiseException(com.clt.diamant.Resources.format("UnknownVariable", "ID " + value));
+            // }
+        }
+        else if(name.equals(SELECTED_LANGUAGE) && value != null) {
+            this.setProperty(name, value);
+            language = value;
+        }
+        else {
+            super.readAttribute(r, name, value, uid_map);
+        }
+    }
     public ArrayList<String> getGoogleLanguages() {
         return null;
     }
